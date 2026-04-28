@@ -12,7 +12,7 @@
 
 This repository implements a minimal **Skip-gram Word2Vec** model using pure PyTorch — no pre-trained weights, no shortcuts. The goal is to build the most fundamental building block of modern NLP from first principles and make the math visible in code.
 
-It is the first step toward understanding how large language models work.
+It is the first step toward understanding how large language models work. Below a table with link to the next steps.
 
 ---
 
@@ -206,7 +206,7 @@ In GPT, each token is mapped to a 768-D or 4096-D vector before being processed 
 This repository is the first step in a series building toward a minimal transformer:
 
 - [x] **mini-embedding** — Skip-gram Word2Vec ← *you are here*
-- [ ] **mini-attention** — scaled dot-product self-attention from scratch
+- [ ] [**mini-attention**](https://github.com/JeffreyRed/mini-self-attention) — scaled dot-product self-attention from scratch
 - [ ] **mini-transformer** — positional encoding + multi-head attention + feedforward block
 - [ ] **mini-gpt** — next-token language model trained on real text
 
