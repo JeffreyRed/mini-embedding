@@ -11,15 +11,16 @@
 3. [The Skip-gram objective](#3-the-skip-gram-objective)
 4. [How meaning emerges from training](#4-how-meaning-emerges-from-training)
 5. [Measuring similarity — cosine distance](#5-measuring-similarity--cosine-distance)
-6. [Code walkthrough](#6-code-walkthrough)
+6. [The embedding IS the neural network — clearing up the confusion](#6-the-embedding-is-the-neural-network--clearing-up-the-confusion)
+7. [Code walkthrough](#7-code-walkthrough)
    - [dataset.py](#datasetpy)
    - [model.py](#modelpy)
    - [train.py](#trainpy)
    - [utils.py](#utilspy)
    - [visualize.py](#visualizepy)
    - [main.py](#mainpy)
-7. [The full data flow](#7-the-full-data-flow)
-8. [Connection to LLMs](#8-connection-to-llms)
+8. [The full data flow](#8-the-full-data-flow)
+9. [Connection to LLMs](#9-connection-to-llms)
 
 ---
 
@@ -166,7 +167,96 @@ cosine_similarity(embed("cats"), embed("rain"))  →  ~0.10
 
 ---
 
-## 6. Code walkthrough
+## 6. The embedding IS the neural network — clearing up the confusion
+
+A common source of confusion: it sounds like the embedding is a *separate process* that happens before the neural network. It is not. The embedding matrix **is** the first layer of the neural network — initialized with random values, updated by backpropagation, just like any other weight matrix.
+
+The full picture of what you have after training:
+
+```
+WHAT YOU HAVE AFTER TRAINING
+─────────────────────────────────────────────────────────────────
+
+  Input:  word index  (e.g. 4 = "cats")
+              │
+              ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │  Embedding Matrix  E  (vocab_size × emb_dim)            │ ← WEIGHTS
+  │                                    updated by backprop  │
+  │  "I"       →  [ 0.12,  0.34]  ← row 0                  │
+  │  "and"     →  [-0.21,  0.11]  ← row 1                  │
+  │  "cats"    →  [ 0.91,  0.80]  ← row 4  ← used          │
+  │  "dogs"    →  [ 0.88,  0.76]  ← row 5                  │
+  │  "rain"    →  [-0.60, -0.42]  ← row 8                  │
+  │  ...                                                    │
+  └─────────────────────────────────────────────────────────┘
+              │  returns row 4 = [0.91, 0.80]
+              ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │  Linear Layer  W  (emb_dim × vocab_size)                │ ← also WEIGHTS
+  └─────────────────────────────────────────────────────────┘
+              │  returns [0.1, 0.3, 1.8, 1.7, -0.9, ...]
+              │          (one score per vocabulary word)
+              ▼
+  ┌─────────────────────────────────────────────────────────┐
+  │  CrossEntropyLoss                                       │
+  │  = softmax → probabilities → -log(correct one)         │
+  └─────────────────────────────────────────────────────────┘
+              │
+              ▼  scalar loss  (e.g. 2.34)
+              │
+         backprop + Adam update both E and W
+```
+
+### What each piece is doing
+
+**Embedding Matrix E** — this is not a lookup table that was built separately. It is a `(vocab_size × embedding_dim)` weight matrix, the same kind of object as any `nn.Linear` layer, except that instead of a matrix multiplication it does a row-index lookup. That lookup is equivalent to multiplying a one-hot vector by `E`, which is just selecting one row. PyTorch makes this efficient with `nn.Embedding`.
+
+**Linear Layer W** — projects the embedding vector back up to `vocab_size` dimensions, producing one raw score (logit) per word. This is what makes the task a classification problem: which of the `vocab_size` words is the correct context?
+
+**CrossEntropyLoss** — applies softmax to the logits (turning them into probabilities that sum to 1), then computes `-log(P(correct context word))`. If the model assigns high probability to the correct context word, the loss is low. If it guesses wrong, the loss is high.
+
+**Backpropagation** — PyTorch automatically differentiates through the whole chain and computes `∂loss / ∂E` and `∂loss / ∂W`. The gradient for `E` only has non-zero values in the row corresponding to the target word — every other row gets a zero gradient for that step.
+
+**Adam optimizer** — applies the gradients with an adaptive learning rate:
+
+```
+E[target_row]  ←  E[target_row]  -  lr × gradient
+```
+
+A concrete example for one step with `("like" → "cats")`:
+
+```
+Before:  E["like"] = [-0.12,  0.44]
+Gradient computed by backprop:  [-0.03, +0.07]
+
+After:   E["like"] = [-0.12 - 0.01×(-0.03),   0.44 - 0.01×(+0.07)]
+                   = [-0.1197,  0.4393]
+```
+
+Only row `"like"` moves. Row `"cats"` gets its own update when it appears as a target in a different pair. Over thousands of steps, every row drifts to a position where it can predict its typical neighbours — and that drift is what we call "learning meaning".
+
+### What the output actually is
+
+A point of confusion: the output of the model during training is **one probability distribution** over the vocabulary — not a matrix of similar words. The similarity search (`most_similar()`) is a completely separate step that happens *after* training, by directly comparing rows of `E` using cosine similarity. The linear layer `W` is discarded entirely for inference.
+
+| Phase | What's used | Output |
+|---|---|---|
+| Training | E + W + Loss | Scalar loss → gradients → weight updates |
+| Inference | E only | Cosine similarity between rows → nearest neighbours |
+
+### Summary: answering the exact question
+
+| Question | Answer |
+|---|---|
+| Does the embedding "become" a neural network? | It always was one — `nn.Embedding` is a weight matrix from line 1 |
+| We init with random values, then train? | Yes — random init, then backprop adjusts every value in E |
+| The matrix is the first layer's weights? | Exactly correct |
+| The output is a matrix of closest vectors? | No — during training the output is a probability distribution. Closest-word search is a post-training query on rows of E directly |
+
+---
+
+## 7. Code walkthrough
 
 ### `dataset.py`
 
@@ -389,7 +479,7 @@ Each step calls exactly one function from `src/`, making `main.py` a readable su
 
 ---
 
-## 7. The full data flow
+## 8. The full data flow
 
 Tracing a single training example end-to-end:
 
@@ -426,7 +516,7 @@ Repeat 180 pairs × 150 epochs = 27,000 updates. By the end, the geometry of the
 
 ---
 
-## 8. Connection to LLMs
+## 9. Connection to LLMs
 
 This project implements the exact same mechanism used in the input layer of GPT, BERT, and every other transformer-based language model. The differences are scale and context:
 

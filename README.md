@@ -42,6 +42,22 @@ This is the same principle used by Word2Vec, GloVe, and — at a much larger sca
 
 ---
 
+## Deep dive — theory & code walkthrough
+
+The [`THEORY.md`](./THEORY.md) file covers everything in depth, including:
+
+- Why integer IDs and one-hot vectors fail as word representations
+- What the embedding matrix actually is and how it is initialized
+- The Skip-gram objective and how meaning emerges from co-occurrence
+- **A full explanation of the neural network architecture** — why the embedding is not a separate process but the first layer of the network, how backpropagation updates each row, and what the output actually is (not a matrix of similar words, but a probability distribution)
+- Line-by-line code walkthrough of every source file
+- End-to-end data flow trace from raw text to a weight update
+- How this connects to GPT and BERT
+
+> If you are confused about how the embedding matrix relates to the neural network, or how training actually updates the weights, start with **[Section 6 of THEORY.md](./THEORY.md#6-the-embedding-is-the-neural-network--clearing-up-the-confusion)**.
+
+---
+
 ## Architecture
 
 ```

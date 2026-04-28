@@ -21,6 +21,8 @@ def train(
     epochs: int = 100,
     lr: float = 0.01,
     verbose: bool = True,
+    snapshots: list = None,
+    snapshot_every: int = 5,
 ) -> list:
     """
     Train the Word2Vec model using Skip-gram with cross-entropy loss.
@@ -31,6 +33,9 @@ def train(
         epochs (int): Number of full passes over the training data.
         lr (float): Learning rate for the Adam optimizer.
         verbose (bool): If True, prints loss every 10 epochs.
+        snapshots (list): If provided, embedding matrix copies are appended
+            every `snapshot_every` epochs. Used for training animation.
+        snapshot_every (int): How often (in epochs) to save a snapshot.
 
     Returns:
         List of per-epoch total losses (useful for plotting a loss curve).
@@ -45,8 +50,8 @@ def train(
         for target, context in dataset.get_batches():
             optimizer.zero_grad()
 
-            logits = model(target)          # (1, vocab_size)
-            loss = loss_fn(logits, context) # scalar
+            logits = model(target)            # (1, vocab_size)
+            loss   = loss_fn(logits, context) # scalar
 
             loss.backward()
             optimizer.step()
@@ -54,6 +59,10 @@ def train(
             total_loss += loss.item()
 
         loss_history.append(total_loss)
+
+        # Save a copy of the embedding weights for animation
+        if snapshots is not None and (epoch % snapshot_every == 0 or epoch == 1):
+            snapshots.append((epoch, model.embedding.weight.detach().clone()))
 
         if verbose and (epoch % 10 == 0 or epoch == 1):
             print(f"Epoch [{epoch:>3}/{epochs}]  Loss: {total_loss:.4f}")
