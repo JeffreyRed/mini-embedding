@@ -153,6 +153,7 @@ Epoch [150/150]  Loss: 18.4392
 Embeddings saved → outputs/embeddings.pt
 ```
 
+![training animation](outputs/training_animation.gif)
 ---
 
 ## Configuration
