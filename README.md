@@ -208,7 +208,7 @@ This repository is the first step in a series building toward a minimal transfor
 
 - [x] **mini-embedding** — Skip-gram Word2Vec ← *you are here*
 - [ ] [**mini-attention**](https://github.com/JeffreyRed/mini-self-attention) — scaled dot-product self-attention from scratch
-- [ ] **mini-transformer** — positional encoding + multi-head attention + feedforward block
+- [ ] [**mini-transformer**](https://github.com/JeffreyRed/mini-transformer)— positional encoding + multi-head attention + feedforward block
 - [ ] **mini-gpt** — next-token language model trained on real text
 
 ---
