@@ -210,6 +210,8 @@ This repository is the first step in a series building toward a minimal transfor
 - [x] [**mini-attention**](https://github.com/JeffreyRed/mini-self-attention) — scaled dot-product self-attention from scratch
 - [x] [**mini-transformer**](https://github.com/JeffreyRed/mini-transformer)— positional encoding + multi-head attention + feedforward block
 - [x] [**mini-gpt**](https://github.com/JeffreyRed/mini-gpt) — next-token language model trained on real text
+- [ ] [**mini-chat**](https://github.com/JeffreyRed/mini-chat) — create a chatbot with a bigger database but still small for educational purpose
+- [ ] [**mini-cross-attention**](https://github.com/JeffreyRed/mini-cross-attention) — understand cross-attention.
 
 ---
 
