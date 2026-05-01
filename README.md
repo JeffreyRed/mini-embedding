@@ -207,9 +207,9 @@ In GPT, each token is mapped to a 768-D or 4096-D vector before being processed 
 This repository is the first step in a series building toward a minimal transformer:
 
 - [x] **mini-embedding** — Skip-gram Word2Vec ← *you are here*
-- [ ] [**mini-attention**](https://github.com/JeffreyRed/mini-self-attention) — scaled dot-product self-attention from scratch
-- [ ] [**mini-transformer**](https://github.com/JeffreyRed/mini-transformer)— positional encoding + multi-head attention + feedforward block
-- [ ] **mini-gpt** — next-token language model trained on real text
+- [x] [**mini-attention**](https://github.com/JeffreyRed/mini-self-attention) — scaled dot-product self-attention from scratch
+- [x] [**mini-transformer**](https://github.com/JeffreyRed/mini-transformer)— positional encoding + multi-head attention + feedforward block
+- [x] [**mini-gpt**](https://github.com/JeffreyRed/mini-gpt) — next-token language model trained on real text
 
 ---
 
