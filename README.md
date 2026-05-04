@@ -211,7 +211,7 @@ This repository is the first step in a series building toward a minimal transfor
 - [x] [**mini-transformer**](https://github.com/JeffreyRed/mini-transformer)— positional encoding + multi-head attention + feedforward block
 - [x] [**mini-gpt**](https://github.com/JeffreyRed/mini-gpt) — next-token language model trained on real text
 - [x] [**mini-chat**](https://github.com/JeffreyRed/mini-chat) — Full LM on real text — overfitting, generation, evaluation 
-- [ ] [**mini-cross-attention**](https://github.com/JeffreyRed/mini-cross-attention) — Cross-attention module, source↔target alignment 
+- [x] [**mini-cross-attention**](https://github.com/JeffreyRed/mini-cross-attention) — Cross-attention module, source↔target alignment 
 - [ ] [**mini-translator**](https://github.com/JeffreyRed/mini-translator) —  English→Spanish encoder-decoder with cross-attention 
 
 ---
